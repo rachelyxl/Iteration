@@ -253,7 +253,7 @@ all_reviews =
 
 ## mean scoping example
 ```{r}
-f =function(x) {
+f = function(x) {
   z = x + y 
   z
 }
@@ -261,6 +261,23 @@ f =function(x) {
 x = 1 
 y = 2
 
-f(x=y)
+f(x = y)
 ```
+
+## Functions as arguments 
+
+```{r}
+my_summary = function(x, sum_func) {
+  
+  sum_func(x)
+}
+
+x_vec = rnorm(100, 3, 7)
+
+mean(x_vec)
+median(x_vec)
+
+my_summary(x_vec, IQR)
+```
+
 
