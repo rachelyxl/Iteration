@@ -11,11 +11,11 @@ x_vec = rnorm(30, mean = 5, sd = 3)
 (x_vec - mean(x_vec)) / sd(x_vec)
 ```
 
-    ##  [1]  1.44264869  1.64255607 -1.44541442 -0.38066699 -0.33674837  0.52369557
-    ##  [7] -1.00369881  0.97549593 -1.51416616  2.10094821  0.45374711 -0.38209468
-    ## [13]  1.12431058 -0.24294055  0.60287161  0.50016994  0.72134842  0.03142142
-    ## [19] -2.27048702 -0.68671449 -0.41713040 -0.75237997  0.93034379 -0.49981177
-    ## [25] -0.75988462  0.03672122 -1.01477916 -0.25649136 -0.10099030  0.97812051
+    ##  [1] -0.51677482 -1.11495494 -1.26525111 -0.85444278  1.76133909  0.92225435
+    ##  [7]  0.21425929  0.68256983 -0.50971415  0.81935628 -0.06844051 -1.26523941
+    ## [13] -0.16911623 -0.79125399 -1.55061285  0.01900797  1.28520580 -1.01227509
+    ## [19] -0.66187499  0.24148723  2.10303382  0.87331792  1.04197549  0.24866084
+    ## [25]  0.87072378  0.60702061  0.33599162  0.05735661 -2.07271302 -0.23089662
 
 I want a function to compute z-scores
 
@@ -39,11 +39,11 @@ z_scores = function(x) {
 z_scores(x_vec)
 ```
 
-    ##  [1]  1.44264869  1.64255607 -1.44541442 -0.38066699 -0.33674837  0.52369557
-    ##  [7] -1.00369881  0.97549593 -1.51416616  2.10094821  0.45374711 -0.38209468
-    ## [13]  1.12431058 -0.24294055  0.60287161  0.50016994  0.72134842  0.03142142
-    ## [19] -2.27048702 -0.68671449 -0.41713040 -0.75237997  0.93034379 -0.49981177
-    ## [25] -0.75988462  0.03672122 -1.01477916 -0.25649136 -0.10099030  0.97812051
+    ##  [1] -0.51677482 -1.11495494 -1.26525111 -0.85444278  1.76133909  0.92225435
+    ##  [7]  0.21425929  0.68256983 -0.50971415  0.81935628 -0.06844051 -1.26523941
+    ## [13] -0.16911623 -0.79125399 -1.55061285  0.01900797  1.28520580 -1.01227509
+    ## [19] -0.66187499  0.24148723  2.10303382  0.87331792  1.04197549  0.24866084
+    ## [25]  0.87072378  0.60702061  0.33599162  0.05735661 -2.07271302 -0.23089662
 
 Try my function on some other things. These should give errors.
 
@@ -106,7 +106,7 @@ mean_and_sd(x_vec)
     ## # A tibble: 1 × 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  2.52  3.96
+    ## 1  3.14  3.98
 
 ## Multiple inputs
 
@@ -126,7 +126,7 @@ sim_data %>%
     ## # A tibble: 1 × 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  3.77  2.84
+    ## 1  4.25  2.69
 
 ``` r
 sim_mean_sd = function(sample_size, mu, sigma){
@@ -148,7 +148,7 @@ sim_mean_sd(100, 6, 3)
     ## # A tibble: 1 × 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  6.30  3.55
+    ## 1  6.01  2.91
 
 ``` r
 sim_mean_sd = function(sample_size, mu = 3 , sigma = 4){
@@ -170,7 +170,7 @@ sim_mean_sd(sample_size = 100, mu = 6, sigma = 3)
     ## # A tibble: 1 × 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  6.48  2.93
+    ## 1  6.18  3.19
 
 ``` r
 sim_mean_sd( mu = 6, sample_size = 100, sigma = 3)
@@ -179,7 +179,7 @@ sim_mean_sd( mu = 6, sample_size = 100, sigma = 3)
     ## # A tibble: 1 × 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  6.46  2.97
+    ## 1  5.97  3.29
 
 ``` r
 sim_mean_sd(sample_size = 100)
@@ -188,4 +188,122 @@ sim_mean_sd(sample_size = 100)
     ## # A tibble: 1 × 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  2.91  3.76
+    ## 1  3.04  3.78
+
+## Let’s review Nopoleon Dynamite
+
+``` r
+url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=1"
+
+read_page_reviews = function(url){
+  
+
+dynamite_html = read_html(url)
+
+review_titles = 
+  dynamite_html %>%
+  html_nodes(".a-text-bold span") %>%
+  html_text()
+
+review_stars = 
+  dynamite_html %>%
+  html_nodes("#cm_cr-review_list .review-rating") %>%
+  html_text() %>%
+  str_extract("^\\d") %>%
+  as.numeric()
+
+review_text = 
+  dynamite_html %>%
+  html_nodes(".review-text-content span") %>%
+  html_text() %>% 
+  str_replace_all("\n", "") %>% 
+  str_trim()
+
+reviews = tibble(
+  title = review_titles,
+  stars = review_stars,
+  text = review_text
+)
+}
+```
+
+What about the next page of review
+
+Let’s turn that code into a function
+
+``` r
+url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=1"
+
+read_page_reviews = function(url){
+  
+
+ html = read_html(url)
+
+review_titles = 
+  html %>%
+  html_nodes(".a-text-bold span") %>%
+  html_text()
+
+review_stars = 
+  html %>%
+  html_nodes("#cm_cr-review_list .review-rating") %>%
+  html_text() %>%
+  str_extract("^\\d") %>%
+  as.numeric()
+
+review_text = 
+ html %>%
+  html_nodes(".review-text-content span") %>%
+  html_text() %>% 
+  str_replace_all("\n", "") %>% 
+  str_trim()
+
+reviews = tibble(
+  title = review_titles,
+  stars = review_stars,
+  text = review_text
+)
+
+reviews
+
+}
+```
+
+Let me try my function
+
+``` r
+dynamite_url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=2"
+
+read_page_reviews(dynamite_url)
+```
+
+    ## # A tibble: 10 × 3
+    ##    title                             stars text                                 
+    ##    <chr>                             <dbl> <chr>                                
+    ##  1 hehehehe                              5 goodjobboys                          
+    ##  2 Painful                               1 I think I sneezed during the movie a…
+    ##  3 GRAND                                 5 GRAND                                
+    ##  4 Hello, 90s                            5 So nostalgic movie                   
+    ##  5 Cult Classic                          5 Watched it with my older grandchilde…
+    ##  6 Format was inaccurate                 4 There was an option to choose blue R…
+    ##  7 Good funny                            3 Would recommend                      
+    ##  8 Not available w/in 48 hour window     1 I couldn't watch it and there is no …
+    ##  9 Your mom went to college.             5 Classic funny movie. It has some of …
+    ## 10 Very funny movie                      5 I watch this movie with my family. V…
+
+Let’s read a few pages of reviews
+
+``` r
+dynamite_url_base = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber="
+
+dynamite_urls = str_c(dynamite_url_base, 1:50)
+
+all_reviews = 
+  bind_rows(
+  read_page_reviews(dynamite_urls[1]),
+  read_page_reviews(dynamite_urls[2]),
+  read_page_reviews(dynamite_urls[3]),
+  read_page_reviews(dynamite_urls[4]),
+  read_page_reviews(dynamite_urls[5])
+)
+```
